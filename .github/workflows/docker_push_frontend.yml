@@ -11,7 +11,6 @@ on:
         type: string
 
 env:
-  REGISTRY: ghcr.io
   IMAGE_NAME: cohere-toolkit-frontend
 
 jobs:
@@ -37,7 +36,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.GCP_PROJECT_ID }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
