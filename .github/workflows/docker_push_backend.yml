@@ -62,7 +62,7 @@ jobs:
 
       - name: Push Docker image
         run: |
-          gcloud auth configure-docker us-docker.pkg.dev $$ \
+          gcloud auth configure-docker us-docker.pkg.dev --quiet && \
           docker push ${{ vars.REGISTRY }}/hello-world
 
       # - name: Tag Docker image
