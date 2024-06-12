@@ -45,20 +45,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # - name: Extract metadata (tags, labels) for Docker
-      #   id: meta
-      #   uses: docker/metadata-action@v3
-      #   with:
-      #     images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      # - name: Build Docker image
-      #   run: |
-      #     docker build -t ${{ steps.meta.outputs.tags }} -f ./src/backend/Dockerfile .
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ steps.meta.outputs.tags }} -f ./src/backend/Dockerfile .
 
-      # - name: Tag Docker image
-      #   run: |
-      #     docker tag ${{ env.IMAGE_NAME }} ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ env.IMAGE_NAME }} ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
 
-      # - name: Push Docker image
-      #   run: |
-      #     docker push ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
+      - name: Push Docker image
+        run: |
+          docker push ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
