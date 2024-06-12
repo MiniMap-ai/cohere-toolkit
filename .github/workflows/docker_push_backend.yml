@@ -30,8 +30,6 @@ jobs:
 
       - name: Login
         uses: google-github-actions/setup-gcloud@v1
-        with:
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v1
@@ -64,7 +62,7 @@ jobs:
 
       - name: Push Docker image
         run: |
-          yes | gcloud auth configure-docker us-docker.pkg.dev \
+          gcloud auth configure-docker us-docker.pkg.dev $$ \
           docker push ${{ vars.REGISTRY }}/hello-world
 
       # - name: Tag Docker image
