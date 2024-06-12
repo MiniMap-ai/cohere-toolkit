@@ -15,7 +15,7 @@ services:
       - POSTGRES_DB=toolkit
     ports:
       - '5432:5432'
-    volumes: 
+    volumes:
       - db:/var/lib/postgresql/data
   test_db:
     image: postgres:14.1-alpine
@@ -32,22 +32,22 @@ services:
       args:
         INSTALL_COMMUNITY_DEPS: false
       dockerfile: ./src/backend/Dockerfile
-    develop:
-      watch:
-        - action: sync
-          path: ./src/backend
-          target: /workspace/src/backend
-          ignore:
-          - __pycache__/
-          - alembic/
-          - data/
-        - action: sync
-          path: ./src/community
-          target: /workspace/src/community
-          ignore:
-          - __pycache__/
-          - alembic/
-          - data/
+    # develop:
+    #   watch:
+    #     - action: sync
+    #       path: ./src/backend
+    #       target: /workspace/src/backend
+    #       ignore:
+    #       - __pycache__/
+    #       - alembic/
+    #       - data/
+    #     - action: sync
+    #       path: ./src/community
+    #       target: /workspace/src/community
+    #       ignore:
+    #       - __pycache__/
+    #       - alembic/
+    #       - data/
     stdin_open: true
     tty: true
     ports:
@@ -60,7 +60,7 @@ services:
       # Mount data folder to sync uploaded files
       - ./src/backend/data:/workspace/src/backend/data
     # network_mode: host
-      
+
   frontend:
     build:
       context: ./src/interfaces/coral_web
@@ -72,13 +72,13 @@ services:
     restart: always
     ports:
       - 4000:4000
-    develop:
-      watch:
-        - action: sync
-          path: ./src/interfaces/coral_web 
-          target: /app
-          ignore:
-          - node_modules/
+    # develop:
+    #   watch:
+    #     - action: sync
+    #       path: ./src/interfaces/coral_web
+    #       target: /app
+    #       ignore:
+    #       - node_modules/
   terrarium:
     image: ghcr.io/cohere-ai/terrarium:latest
     ports:
