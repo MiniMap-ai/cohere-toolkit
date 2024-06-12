@@ -61,4 +61,4 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
+          docker push ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
