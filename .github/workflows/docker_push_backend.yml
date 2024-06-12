@@ -60,5 +60,7 @@ jobs:
           docker tag ${{ env.IMAGE_NAME }} ${{ steps.meta.outputs.tags }}
 
       - name: Push Docker image
+        env:
+          THE_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           docker push ${{ steps.meta.outputs.tags }}
