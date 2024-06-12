@@ -45,11 +45,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v3
+      #   with:
+      #     images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build Docker image
         run: |
