@@ -27,6 +27,7 @@ jobs:
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+          scopes: 'https://www.googleapis.com/auth/cloud-platform'
 
       - name: Login
         uses: google-github-actions/setup-gcloud@v0
@@ -58,4 +59,3 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ${{ env.IMAGE_NAME }}
-
