@@ -38,6 +38,9 @@ jobs:
       - name: Authenticate Docker to Artifact Registry
         run: gcloud auth configure-docker ${{ vars.REGISTRY }}
 
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@v3
@@ -50,5 +53,5 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push ${{ steps.meta.outputs.tags }}
+          docker push ${{ env.IMAGE_NAME }}
 
