@@ -53,14 +53,14 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ steps.meta.outputs.tags }} -f ./src/backend/Dockerfile .
+          docker build -t ${{ env.IMAGE_NAME }}:${{ github.ref }} -f ./src/backend/Dockerfile .
 
       - name: Tag Docker image
         run: |
-          docker tag ${{ env.IMAGE_NAME }} ${{ steps.meta.outputs.tags }}
+          docker tag ${{ env.IMAGE_NAME }} ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref }}
 
       - name: Push Docker image
         env:
           THE_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          docker push ${{ steps.meta.outputs.tags }}
+          docker push ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref }}
