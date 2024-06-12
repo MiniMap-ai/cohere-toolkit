@@ -57,10 +57,10 @@ jobs:
 
       - name: Tag Docker image
         run: |
-          docker tag ${{ env.IMAGE_NAME }} ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
+          docker tag ${{ env.IMAGE_NAME }} ${{ steps.meta.outputs.tags }}
 
       - name: Push Docker image
         env:
           THE_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          docker push ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
+          docker push ${{ steps.meta.outputs.tags }}
