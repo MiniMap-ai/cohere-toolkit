@@ -51,16 +51,27 @@ jobs:
         with:
           images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build Docker image
-        run: |
-          docker build -t ${{ env.IMAGE_NAME }} -f ./src/backend/Dockerfile .
+      # - name: Build Docker image
+      #   run: |
+      #     docker build -t ${{ env.IMAGE_NAME }} -f ./src/backend/Dockerfile .
+
+      - name: Pull docker hello-world image
+        run: docker pull hello-world
 
       - name: Tag Docker image
         run: |
-          docker tag ${{ env.IMAGE_NAME }} ${{ steps.meta.outputs.tags }}
+          docker tag hello-world  ${{ vars.REGISTRY }}/hello-world
 
       - name: Push Docker image
-        env:
-          THE_TAGS: ${{ steps.meta.outputs.tags }}
         run: |
-          docker push ${{ steps.meta.outputs.tags }}
+          docker push ${{ vars.REGISTRY }}/hello-world
+
+      # - name: Tag Docker image
+      #   run: |
+      #     docker tag ${{ env.IMAGE_NAME }} ${{ steps.meta.outputs.tags }}
+
+      # - name: Push Docker image
+      #   env:
+      #     THE_TAGS: ${{ steps.meta.outputs.tags }}
+      #   run: |
+      #     docker push ${{ steps.meta.outputs.tags }}
