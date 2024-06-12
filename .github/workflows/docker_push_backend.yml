@@ -36,7 +36,7 @@ jobs:
 
 
       - name: Authenticate Docker to Artifact Registry
-        run: gcloud auth configure-docker ${{ vars.REGISTRY }}
+        run: gcloud auth configure-docker  --quiet
 
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -53,5 +53,5 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push ${{ steps.meta.outputs.tags }}
+          docker push ${{ env.IMAGE_NAME }}
 
