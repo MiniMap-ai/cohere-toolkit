@@ -55,9 +55,9 @@ jobs:
         run: |
           docker build -t ${{ env.IMAGE_NAME }} -f ./src/backend/Dockerfile .
 
-      # - name: Tag Docker image
-      #   run: |
-      #     docker tag ${{ env.IMAGE_NAME }} ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ env.IMAGE_NAME }} ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.tags }}
 
       # - name: Push Docker image
       #   run: |
