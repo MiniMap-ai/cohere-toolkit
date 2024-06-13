@@ -17,6 +17,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     # needs: build-and-push-backend-image
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
       # - name: Checkout code
@@ -25,7 +28,7 @@ jobs:
       # - name: Authenticate to Google Cloud
       #   run: echo "${{ secrets.GCP_SA_KEY_BASE64 }}" | base64 --decode > /tmp/gcp_sa_key.json && gcloud auth activate-service-account --key-file=/tmp/gcp_sa_key.json && gcloud config set project <PROJECT_ID> && rm /tmp/gcp_sa_key.json
       - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
+        uses: google-github-actions/setup-gcloud@v2
         with:
 
           service_account_key: ${{ secrets.GCP_SA_KEY }}
