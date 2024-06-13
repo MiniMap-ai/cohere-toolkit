@@ -42,7 +42,7 @@ jobs:
 
       - name: Verify Environment Variables
         run: |
-          echo "Project ID: ${{ secrets.GCP_PROJECT_ID }}"
+          echo "Project ID: ${{ vars.GCP_PROJECT_ID }}"
           echo "Image Name: ${{ env.IMAGE_NAME }}"
 
       # Deploy the image to Cloud Run
