@@ -14,44 +14,40 @@ env:
   IMAGE_NAME: cohere-toolkit-backend
 
 jobs:
-  build-and-push-backend-image:
+  deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    # needs: build-and-push-backend-image
 
     steps:
+      # - name: Checkout code
+      #   uses: actions/checkout@v2
 
-      - name: Login
-        uses: google-github-actions/setup-gcloud@v0
+      # - name: Authenticate to Google Cloud
+      #   run: echo "${{ secrets.GCP_SA_KEY_BASE64 }}" | base64 --decode > /tmp/gcp_sa_key.json && gcloud auth activate-service-account --key-file=/tmp/gcp_sa_key.json && gcloud config set project <PROJECT_ID> && rm /tmp/gcp_sa_key.json
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
         with:
-          project_id: ${{ vars.GCP_PROJECT_ID }}
-          service_account_email: deploy-a-thing@minimap-v0.iam.gserviceaccount.com
+
           service_account_key: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Configure Docker
-        run: gcloud auth configure-docker --quiet
-
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - run: 'echo "$KEY" > ./key.json'
-        shell: bash
-        env:
-          KEY: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      # Deploy the image to Cloud Run
       - name: Deploy to Cloud Run
         run: |
-          gcloud run deploy ${{ env.IMAGE_NAME }} \
-            --project=${{ vars.GCP_PROJECT_ID }} \
-            --image=${{ steps.meta.outputs.tags }} \
-            --platform=managed \
-            --region=us-central1 \
-            --allow-unauthenticated \
-            --update-env-vars=DATABASE_URL=${{ secrets.DATABASE_URL }},COHERE_API_KEY=${{ secrets.COHERE_API_KEY }} \
-            --memory=4Gi \
-            --cpu=4 \
-            --max-instances=1
+          gcloud run deploy <SERVICE_NAME> \
+            --image gcr.io/<PROJECT_ID>/<IMAGE_NAME>:${{ github.sha }} \
+            --region <REGION> \
+            --platform managed \
+            --allow-unauthenticated
+
+    # steps:
+
+    #   - name: Login
+    #     uses: google-github-actions/setup-gcloud@v0
+    #     with:
+    #       project_id: ${{ vars.GCP_PROJECT_ID }}
+    #       service_account_email: deploy-a-thing@minimap-v0.iam.gserviceaccount.com
+    #       service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+    #   - name: Checkout repository
+    #     uses: actions/checkout@v2
+
+    # Deploy the image to Cloud Run
