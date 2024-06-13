@@ -10,8 +10,6 @@ on:
         required: false
         type: string
 
-env:
-  IMAGE_NAME: cohere-toolkit-backend
 
 jobs:
   deploy:
@@ -37,11 +35,11 @@ jobs:
 
       # Deploy the image to Cloud Run
       - name: Deploy to Cloud Run
-        env:
-          Database_URL: ${{ secrets.DATABASE_URL }}
-          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+        # env:
+        #   Database_URL: ${{ secrets.DATABASE_URL }}
+        #   COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+        #   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+        #   IMAGE_NAME: ${{ env.IMAGE_NAME }}
 
         run: |
           gcloud run deploy ${{ env.IMAGE_NAME }} \
