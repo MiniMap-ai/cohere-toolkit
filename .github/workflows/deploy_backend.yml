@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tags:
-        description: 'Docker image tag (e.g: v0.0.1)'
+        description: 'Branch or tag (e.g: v0.0.1)'
         required: false
         type: string
 
@@ -22,27 +22,35 @@ jobs:
       id-token: 'write'
 
     steps:
-      # - name: Checkout code
-      #   uses: actions/checkout@v2
-
-      # - name: Authenticate to Google Cloud
-      #   run: echo "${{ secrets.GCP_SA_KEY_BASE64 }}" | base64 --decode > /tmp/gcp_sa_key.json && gcloud auth activate-service-account --key-file=/tmp/gcp_sa_key.json && gcloud config set project <PROJECT_ID> && rm /tmp/gcp_sa_key.json
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
 
           service_account_key: ${{ secrets.GCP_SA_KEY }}
 
+      - name: Set up environment variables
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "COHERE_API_KEY=${{ secrets.COHERE_API_KEY }}" >> $GITHUB_ENV
+          echo "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> $GITHUB_ENV
+          echo "IMAGE_TAG=${{ github.event.inputs.tags }}" >> $GITHUB_ENV
+
       # Deploy the image to Cloud Run
       - name: Deploy to Cloud Run
+        env:
+          Database_URL: ${{ secrets.DATABASE_URL }}
+          COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          IMAGE_NAME: ${{ env.IMAGE_NAME }}
+
         run: |
           gcloud run deploy ${{ env.IMAGE_NAME }} \
-            --project=${{ secrets.GCP_PROJECT_ID }} \
-            --image=${{ steps.meta.outputs.tags }} \
+            --project=${{ env.GCP_PROJECT_ID }} \
+            --image=${{ env.meta.outputs.tags }} \
             --platform=managed \
             --region=us-central1 \
             --allow-unauthenticated \
-            --update-env-vars=DATABASE_URL=${{ secrets.DATABASE_URL }},COHERE_API_KEY=${{ secrets.COHERE_API_KEY }} \
+            --update-env-vars=DATABASE_URL=${{ env.DATABASE_URL }},COHERE_API_KEY=${{ env.COHERE_API_KEY }} \
             --memory=4Gi \
             --cpu=4 \
             --max-instances=1
