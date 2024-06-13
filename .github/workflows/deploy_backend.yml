@@ -10,6 +10,8 @@ on:
         required: false
         type: string
 
+env:
+  IMAGE_NAME: cohere-toolkit-backend
 
 jobs:
   deploy:
@@ -23,46 +25,18 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
         with:
-
           service_account_key: ${{ secrets.GCP_SA_KEY }}
-
-      - name: Set up environment variables
-        run: |
-          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
-          echo "COHERE_API_KEY=${{ secrets.COHERE_API_KEY }}" >> $GITHUB_ENV
-          echo "GCP_PROJECT_ID=${{ secrets.GCP_PROJECT_ID }}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${{ github.event.inputs.tags }}" >> $GITHUB_ENV
 
       # Deploy the image to Cloud Run
       - name: Deploy to Cloud Run
-        # env:
-        #   Database_URL: ${{ secrets.DATABASE_URL }}
-        #   COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
-        #   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-        #   IMAGE_NAME: ${{ env.IMAGE_NAME }}
-
         run: |
           gcloud run deploy ${{ env.IMAGE_NAME }} \
             --project=${{ env.GCP_PROJECT_ID }} \
-            --image=${{ env.meta.outputs.tags }} \
+            --image=${{ steps.meta.outputs.tags }} \
             --platform=managed \
             --region=us-central1 \
             --allow-unauthenticated \
-            --update-env-vars=DATABASE_URL=${{ env.DATABASE_URL }},COHERE_API_KEY=${{ env.COHERE_API_KEY }} \
+            --update-env-vars=DATABASE_URL=${{ secrets.DATABASE_URL }},COHERE_API_KEY=${{ secrets.COHERE_API_KEY }} \
             --memory=4Gi \
             --cpu=4 \
             --max-instances=1
-
-    # steps:
-
-    #   - name: Login
-    #     uses: google-github-actions/setup-gcloud@v0
-    #     with:
-    #       project_id: ${{ vars.GCP_PROJECT_ID }}
-    #       service_account_email: deploy-a-thing@minimap-v0.iam.gserviceaccount.com
-    #       service_account_key: ${{ secrets.GCP_SA_KEY }}
-
-    #   - name: Checkout repository
-    #     uses: actions/checkout@v2
-
-    # Deploy the image to Cloud Run
