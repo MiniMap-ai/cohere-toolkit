@@ -41,14 +41,9 @@ jobs:
 
 
       - name: Verify Environment Variables
-        env:
-          THE_TAG: ${{ github.event.inputs.tags }}
-          ENV_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
         run: |
           echo "Project ID: ${{ vars.GCP_PROJECT_ID }}"
           echo "Image Name: ${{ env.IMAGE_NAME }}"
-          echo "Tag: ${{ env.THE_TAG }}"
-          echo "Secrets: ${{ secrets.GCP_PROJECT_ID }}"
 
       # Deploy the image to Cloud Run
       - name: Deploy to Cloud Run
