@@ -11,13 +11,14 @@ from backend.tools import (
     ReadFileTool,
     SearchFileTool,
     TavilyInternetSearch,
+    LangChainMinimapRetriever
 )
 
 """
-List of available tools. Each tool should have a name, implementation, is_visible and category. 
+List of available tools. Each tool should have a name, implementation, is_visible and category.
 They can also have kwargs if necessary.
 
-You can switch the visibility of a tool by changing the is_visible parameter to True or False. 
+You can switch the visibility of a tool by changing the is_visible parameter to True or False.
 If a tool is not visible, it will not be shown in the frontend.
 
 If you want to add a new tool, check the instructions on how to implement a retriever in the documentation.
@@ -32,6 +33,7 @@ class ToolName(StrEnum):
     Python_Interpreter = "Python_Interpreter"
     Calculator = "Calculator"
     Tavily_Internet_Search = "Internet_Search"
+    Minimap = "Minimap"
 
 
 ALL_TOOLS = {
@@ -52,6 +54,23 @@ ALL_TOOLS = {
         category=Category.DataLoader,
         description="Retrieves documents from Wikipedia using LangChain.",
     ),
+    ToolName.Minimap: ManagedTool(
+        name=ToolName.Minimap,
+        implementation=LangChainMinimapRetriever,
+        parameter_definitions={
+            "query": {
+                "description": "Query for retrieval.",
+                "type": "str",
+                "required": True,
+            }
+        },
+        is_visible=True,
+        is_available=LangChainMinimapRetriever.is_available(),
+        error_message="LangChainMinimapRetriever not available.",
+        category=Category.DataLoader,
+        description="Retrieves news and news-like content from Minimap.ai content search platform.",
+    ),
+
     ToolName.Search_File: ManagedTool(
         name=ToolName.Search_File,
         implementation=SearchFileTool,
@@ -143,7 +162,7 @@ ALL_TOOLS = {
 def get_available_tools() -> dict[ToolName, dict]:
     langchain_tools = [ToolName.Python_Interpreter, ToolName.Tavily_Internet_Search]
     use_langchain_tools = bool(
-        strtobool(os.getenv("USE_EXPERIMENTAL_LANGCHAIN", "False"))
+        strtobool(os.getenv("USE_EXPERIMENTAL_LANGCHAIN", "True"))
     )
     use_community_tools = bool(strtobool(os.getenv("USE_COMMUNITY_FEATURES", "False")))
 
