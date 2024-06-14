@@ -17,6 +17,9 @@ services:
       - '5432:5432'
     volumes:
       - db:/var/lib/postgresql/data
+    networks:
+      - my_network
+
   test_db:
     image: postgres:14.1-alpine
     restart: unless-stopped
@@ -26,40 +29,50 @@ services:
       - POSTGRES_DB=test_toolkit
     ports:
       - '5433:5432'
+    networks:
+      - my_network
+
   backend:
     build:
       context: .
       args:
         INSTALL_COMMUNITY_DEPS: false
       dockerfile: ./src/backend/Dockerfile
-    # develop:
-    #   watch:
-    #     - action: sync
-    #       path: ./src/backend
-    #       target: /workspace/src/backend
-    #       ignore:
-    #       - __pycache__/
-    #       - alembic/
-    #       - data/
-    #     - action: sync
-    #       path: ./src/community
-    #       target: /workspace/src/community
-    #       ignore:
-    #       - __pycache__/
-    #       - alembic/
-    #       - data/
+    develop:
+      watch:
+        - action: sync
+          path: ./src/backend
+          target: /workspace/src/backend
+          ignore:
+          - __pycache__/
+          - alembic/
+          - data/
+        - action: sync
+          path: ./src/community
+          target: /workspace/src/community
+          ignore:
+          - __pycache__/
+          - alembic/
+          - data/
     stdin_open: true
     tty: true
     ports:
       - '8000:8000'
+      # - '8001:8001'
     depends_on:
       - db
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"  # Map host.docker.internal to the host's IP
+    environment:
+      - HOST_SERVICE_URL=http://host.docker.internal:8081  # Environment variable for host service URL
     volumes:
       # Mount alembic folder to sync migrations
       - ./src/backend/alembic:/workspace/src/backend/alembic
       # Mount data folder to sync uploaded files
       - ./src/backend/data:/workspace/src/backend/data
     # network_mode: host
+    networks:
+      - my_network
 
   frontend:
     build:
@@ -72,20 +85,29 @@ services:
     restart: always
     ports:
       - 4000:4000
-    # develop:
-    #   watch:
-    #     - action: sync
-    #       path: ./src/interfaces/coral_web
-    #       target: /app
-    #       ignore:
-    #       - node_modules/
+    develop:
+      watch:
+        - action: sync
+          path: ./src/interfaces/coral_web
+          target: /app
+          ignore:
+          - node_modules/
+    networks:
+      - my_network
   terrarium:
     image: ghcr.io/cohere-ai/terrarium:latest
     ports:
       - '8080:8080'
     expose:
       - '8080'
+    networks:
+      - my_network
+
 volumes:
   db:
     name: cohere_toolkit_db
     driver: local
+
+networks:
+  my_network:
+   driver: bridge
