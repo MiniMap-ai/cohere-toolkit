@@ -58,7 +58,7 @@ class MinimapAPIWrapper(BaseModel):
 
     parse: Any  #: :meta private:
 
-    base_url: str = "http://host.docker.internal:8081"
+    base_url: str = os.environ.get("MINIMAP_API_URL", "http://host.docker.internal:8081")
     search_endpoint: str = urljoin(base_url, "/api/v0/platform/elastic_search")
 
     max_retry: int = 5
