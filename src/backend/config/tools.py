@@ -11,7 +11,7 @@ from backend.tools import (
     ReadFileTool,
     SearchFileTool,
     TavilyInternetSearch,
-    LangChainMinimapRetriever
+    LangChainMinimapRetriever,
 )
 
 """
