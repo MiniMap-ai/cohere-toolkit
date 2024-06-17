@@ -11,37 +11,117 @@ on:
         type: string
 
 env:
-  REGISTRY: ghcr.io
   IMAGE_NAME: cohere-toolkit-backend
 
 jobs:
   build-and-push-backend-image:
     runs-on: ubuntu-latest
-    # Sets the permissions granted to the `GITHUB_TOKEN` for the actions in this job.
     permissions:
       contents: read
-      packages: write
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Log in to the Container registry
-        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+
+      - name: Login
+        uses: google-github-actions/setup-gcloud@v0
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          service_account_email: deploy-a-thing@minimap-v0.iam.gserviceaccount.com
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker --quiet
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - run: 'echo "$KEY" > ./key.json'
+        shell: bash
+        env:
+          KEY: ${{ secrets.GCP_SA_KEY }}
+
+      # - name: Checkout code
+      #   uses: actions/checkout@v2
+
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v1
+
+      # - name: Decode and write GCP key to file
+      #   run: echo "${{ secrets.GCP_SA_KEY_B64 }}" | base64 --decode > /tmp/gcp_sa_key.json
+
+      # - name: Authenticate to Google Cloud
+      #   run: |
+      #     gcloud auth activate-service-account --key-file=/tmp/gcp_sa_key.json
+      #     gcloud auth configure-docker us-docker.pkg.dev --quiet
+
+      # - name: Checkout repository
+      #   uses: actions/checkout@v4
+
+      # - name: Set up Docker Buildx
+      #   uses: docker/setup-buildx-action@v1
+
+      # - name: Authenticate with service account
+      #   uses: google-github-actions/auth@v1
+      #   with:
+      #     credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+
+      # # - name: Login
+      # #   uses: google-github-actions/setup-gcloud@v1
+
+      # - name: Set up Cloud SDK
+      #   uses: google-github-actions/setup-gcloud@v1
+      #   with:
+      #     project_id: ${{ vars.GCP_PROJECT_ID }}
+      #     service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      # - name: Configure Docker to use Google Cloud credentials
+      #   run: gcloud auth configure-docker us-docker.pkg.dev
+      #     export_default_credentials: true
+
+      # - name: Configure Docker
+      #   run: yes | gcloud auth configure-docker us-docker.pkg.dev
+
+      # - name: Checkout repository
+      #   uses: actions/checkout@v2
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        uses: docker/metadata-action@v3
         with:
-          images: ${{ env.REGISTRY }}/cohere-ai/${{ env.IMAGE_NAME }}
-      - name: Build and push Docker image
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
-        with:
-          context: .
-          tags: ${{ steps.meta.outputs.tags }}
-          file: ./src/backend/Dockerfile
-          push: true
+          images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
 
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ env.IMAGE_NAME }} -f ./src/backend/Dockerfile .
+
+      # - name: Pull docker hello-world image
+      #   run: docker pull hello-world
+
+      # - name: Tag Docker image
+      #   run: |
+      #     docker tag hello-world  ${{ vars.REGISTRY }}/hello-world
+
+      # # Save the SA key to a file so that it can be used by the docker build
+      # - name: Save SA key to file
+      #   run: echo "${{ secrets.GCP_SA_KEY }}" > /tmp/gcp_sa_key.json
+
+      # - name: Try auth again!
+      #   run: |
+      #     gcloud auth activate-service-account --key-file /tmp/gcp_sa_key.json
+      #     gcloud auth configure-docker --quiet
+      #     docker login -u _json_key -p "$(cat /tmp/gcp_sa_key.json)" https://gcr.io
+
+      # - name: Push Docker image
+      #   run: |
+      #     docker push ${{ vars.REGISTRY }}/hello-world
+
+      - name: Tag Docker image
+        run: |
+          docker tag ${{ env.IMAGE_NAME }} ${{ steps.meta.outputs.tags }}
+
+      - name: Push Docker image
+        env:
+          THE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          docker push ${{ steps.meta.outputs.tags }}
 
