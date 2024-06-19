@@ -43,7 +43,7 @@ jobs:
         run: |
           gcloud run deploy ${{ env.IMAGE_NAME }} \
             --project=${{ vars.GCP_PROJECT_ID }} \
-            --image=${{ env.IMAGE_NAME }}:integration \
+            --image=${{ env.IMAGE_NAME }}\
             --platform=managed \
             --region=us-central1 \
             --allow-unauthenticated \
