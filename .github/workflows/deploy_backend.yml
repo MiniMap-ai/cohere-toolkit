@@ -22,7 +22,7 @@ jobs:
       id-token: 'write'
 
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v2
 
       - name: Auth
@@ -38,12 +38,18 @@ jobs:
       - name: Configure Docker
         run: gcloud auth configure-docker
 
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
+
       # Deploy the image to Cloud Run
       - name: Deploy to Cloud Run
         run: |
           gcloud run deploy ${{ env.IMAGE_NAME }} \
             --project=${{ vars.GCP_PROJECT_ID }} \
-            --image=${{ env.IMAGE_NAME }}\
+            --image=${{ steps.meta.outputs.tags }} \
             --platform=managed \
             --region=us-central1 \
             --allow-unauthenticated \

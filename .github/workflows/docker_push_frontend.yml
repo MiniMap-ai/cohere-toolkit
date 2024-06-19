@@ -45,4 +45,38 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           push: true
 
+      # - name: Checkout repository
+      #   uses: actions/checkout@v2
 
+      # - name: Auth
+      #   uses: google-github-actions/auth@v1
+      #   with:
+      #     credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # - name: Set up Cloud SDK
+      #   uses: google-github-actions/setup-gcloud@v2
+      #   with:
+      #     project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      # - name: Configure Docker
+      #   run: gcloud auth configure-docker
+
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v3
+      #   with:
+      #     images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # Deploy the image to Cloud Run
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.IMAGE_NAME }} \
+            --project=${{ vars.GCP_PROJECT_ID }} \
+            --image=${{ steps.meta.outputs.tags }} \
+            --platform=managed \
+            --region=us-central1 \
+            --allow-unauthenticated \
+            --update-env-vars=DATABASE_URL=${{ secrets.DATABASE_URL }},COHERE_API_KEY=${{ secrets.COHERE_API_KEY }},MINIMAP_API_URL=${{ vars.MINIMAP_API_URL }} \
+            --memory=4Gi \
+            --cpu=4 \
+            --max-instances=1
