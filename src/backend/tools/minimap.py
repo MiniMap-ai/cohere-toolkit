@@ -140,4 +140,5 @@ class LangChainMinimapRetriever(CohereBaseTool):
     def call(self, parameters: dict, **kwargs: Any) -> List[Dict[str, Any]]:
         query = parameters.get("query", "")
         results = self.client.run(query)
-        return results # [{"text": result} for result in results]
+        print(results)
+        return [dict(result) for result in results]
