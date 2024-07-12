@@ -33,7 +33,7 @@ class ToolName(StrEnum):
     Python_Interpreter = "Python_Interpreter"
     Calculator = "Calculator"
     Tavily_Internet_Search = "Internet_Search"
-    MiniMap = "MiniMap"
+    Minimap = "Minimap"
 
 
 ALL_TOOLS = {
@@ -54,12 +54,12 @@ ALL_TOOLS = {
         category=Category.DataLoader,
         description="Retrieves documents from Wikipedia using LangChain.",
     ),
-    ToolName.MiniMap: ManagedTool(
-        name=ToolName.MiniMap,
+    ToolName.Minimap: ManagedTool(
+        name=ToolName.Minimap,
         implementation=LangChainMinimapRetriever,
         parameter_definitions={
             "query": {
-                "description": "Query for searching the news. It can be a topic, a named entities, or a quoted keyword.",
+                "description": "Query for searching the news. It can be a topic, a named entities, or a quoted keyword. Summarizations should be in the form of a bulleted list where each bullet point is its own core topic.",
                 "type": "str",
                 "required": True,
             }

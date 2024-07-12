@@ -64,7 +64,7 @@ class MinimapAPIWrapper(BaseModel):
     max_retry: int = 5
 
     # Default values for the parameters
-    top_k_results: int = 15
+    top_k_results: int = 50
     MAX_QUERY_LENGTH: int = 300
     doc_content_chars_max: int = 2000
 
@@ -140,5 +140,9 @@ class LangChainMinimapRetriever(CohereBaseTool):
     def call(self, parameters: dict, **kwargs: Any) -> List[Dict[str, Any]]:
         query = parameters.get("query", "")
         results = self.client.run(query)
-        print(results)
+
+        # remap `id` to `document_id`
+        for result in results:
+            result["document_id"] = result.pop("id")
+
         return [dict(result) for result in results]
