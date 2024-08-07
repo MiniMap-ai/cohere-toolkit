@@ -95,7 +95,10 @@ class MinimapAPIWrapper(BaseModel):
 
             # Rename id to doc_id
             for result in results:
-                result['doc_id'] = result.pop('id')
+                try:
+                    result['doc_id'] = result.get('id')
+                except Exception as ex:
+                    ...
 
             return results
 

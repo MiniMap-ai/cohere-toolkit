@@ -23,7 +23,7 @@ COPY .env.production .
 
 # Build the Next.js app
 ARG NODE_ENV=development
-RUN if [ "$NODE_ENV" = "production" ]; then npm run build; else npm run build:dev; fi
+RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
 
 
 # Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
