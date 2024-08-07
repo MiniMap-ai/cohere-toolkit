@@ -1,6 +1,6 @@
 import { Transition } from '@headlessui/react';
 import { flatten, sortBy, uniqBy } from 'lodash';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useMemo, useState } from 'react';
 
 import { Document } from '@/cohere-client';
@@ -109,8 +109,8 @@ export const Citation = React.forwardRef<HTMLDivElement, Props>(function Citatio
         ...styles,
         ...(translateY !== 0 && isSelected
           ? {
-              '--selectedTranslateY': `${translateY}px`,
-            }
+            '--selectedTranslateY': `${translateY}px`,
+          }
           : {}),
       }}
       className={cn(

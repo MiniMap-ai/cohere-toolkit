@@ -51,7 +51,7 @@ const Conversation: React.FC<Props> = ({ conversationId, startOptionsEnabled = f
     conversation: { messages },
   } = useConversationStore();
   const {
-    citations: { selectedCitation },
+    citations: { selectedCitation, citationReferences },
     selectCitation,
   } = useCitationsStore();
   const { data: tools } = useListTools();
@@ -183,7 +183,7 @@ const Conversation: React.FC<Props> = ({ conversationId, startOptionsEnabled = f
           }, 100);
         }}
       >
-        <DragDropFileInput
+        {/* <DragDropFileInput
           label=""
           subLabel=""
           onChange={handleUploadFile}
@@ -196,7 +196,7 @@ const Conversation: React.FC<Props> = ({ conversationId, startOptionsEnabled = f
               flex: isDragDropInputActive,
             }
           )}
-        />
+        /> */}
         <MessagingContainer
           conversationId={conversationId}
           startOptionsEnabled={startOptionsEnabled}

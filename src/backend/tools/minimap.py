@@ -64,7 +64,7 @@ class MinimapAPIWrapper(BaseModel):
     max_retry: int = 5
 
     # Default values for the parameters
-    top_k_results: int = 50
+    top_k_results: int = 100
     MAX_QUERY_LENGTH: int = 300
     doc_content_chars_max: int = 2000
 
@@ -93,14 +93,14 @@ class MinimapAPIWrapper(BaseModel):
             # limit the number of results to top_k_results
             results = results[:self.top_k_results]
 
-            # strip out the `id` field from the results
-            # results = [{"text": result["title"], 'url': result['url']} for result in results]
+            # Rename id to doc_id
+            for result in results:
+                result['doc_id'] = result.pop('id')
 
-            print(results)
             return results
 
         except Exception as ex:
-            return f"PubMed exception: {ex}"
+            return f"Minimap exception: {ex}"
 
 
 class MinimapQueryRun(BaseTool):
@@ -121,7 +121,7 @@ class MinimapQueryRun(BaseTool):
         query: str,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
-        """Use the PubMed tool."""
+        """Use the Minimap tool."""
         return self.api_wrapper.run(query)
 
 class LangChainMinimapRetriever(CohereBaseTool):

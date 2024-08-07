@@ -11,7 +11,7 @@ import { ReservedClasses } from '@/constants';
 import { MESSAGE_LIST_CONTAINER_ID, useCalculateCitationStyles } from '@/hooks/citations';
 import { useFixCopyBug } from '@/hooks/fixCopyBug';
 import { useCitationsStore } from '@/stores';
-import { ChatMessage, MessageType, StreamingMessage, isFulfilledMessage } from '@/types/message';
+import { ChatMessage, FulfilledMessage, MessageType, StreamingMessage, isFulfilledMessage } from '@/types/message';
 import { cn } from '@/utils';
 
 type Props = {
@@ -58,7 +58,7 @@ const Content: React.FC<Props> = (props) => {
   const { isStreaming, messages, composer, streamingMessage, onPromptSelected } = props;
   const scrollToBottom = useScrollToBottom();
   const {
-    citations: { hasCitations },
+    citations: { hasCitations, citationReferences },
   } = useCitationsStore();
 
   useFixCopyBug();
@@ -93,6 +93,31 @@ const Content: React.FC<Props> = (props) => {
       scrollToBottom({ behavior: 'smooth' });
     }
   }, [messages.length, scrollToBottom]);
+
+  useEffect(() => {
+    if (streamingMessage && streamingMessage.state === 'fulfilled') {
+      const generationId = (streamingMessage as FulfilledMessage).generationId
+      if (citationReferences[generationId]) {
+
+        // Filter
+        const minimapCitations = Object.values(citationReferences[generationId])
+          .flat()
+          .filter((citation: any) => citation.tool_name === 'Minimap')
+
+        // Extract and deduplicate doc_ids
+        let minimapCitationsUnique = new Set(minimapCitations.map((c: any) => parseInt(c.fields.doc_id, 10)));
+
+        const payload = {
+          ids: Array.from(minimapCitationsUnique),
+          citationId: generationId,
+        }
+
+        // Send to parent window
+        window.top && window.top.postMessage({ type: 'newCitations', payload }, '*')
+        console.log('newCitations', minimapCitationsUnique, window.top)
+      }
+    }
+  }, [streamingMessage])
 
   const { citationToStyles, messageContainerDivRef, composerContainerDivRef } =
     useCalculateCitationStyles(messages, streamingMessage);
@@ -163,11 +188,11 @@ const Messages = forwardRef<HTMLDivElement, MessagesProps>(function MessagesInte
   const isConversationEmpty = messages.length === 0;
   return (
     <div className="flex h-full flex-col gap-y-4 px-4 py-6 md:gap-y-6" ref={ref}>
-      {startOptionsEnabled && (
+      {/* {startOptionsEnabled && (
         <div className="flex h-full w-full flex-col justify-center p-4">
           <StartModes show={isConversationEmpty} onPromptSelected={onPromptSelected} />
         </div>
-      )}
+      )} */}
 
       <div className="mt-auto flex flex-col gap-y-4 md:gap-y-6">
         {messages.map((m, i) => {
