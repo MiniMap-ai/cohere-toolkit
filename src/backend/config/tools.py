@@ -59,7 +59,7 @@ ALL_TOOLS = {
         implementation=LangChainMinimapRetriever,
         parameter_definitions={
             "query": {
-                "description": "Search API that takes a query or phrase.",
+                "description": "Search API that takes a query or phrase. ",
                 "type": "str",
                 "required": True,
             }
@@ -68,7 +68,7 @@ ALL_TOOLS = {
         is_available=LangChainMinimapRetriever.is_available(),
         error_message="Minimap API not available.",
         category=Category.DataLoader,
-        description="Fetches the most relevant news and content from Minimap.ai.",
+        description="Fetches the most relevant news and content from Minimap.ai. Results should be presented as an executive summary, grouped and summarized for the user with section headings and bullet points.",
     ),
     # ToolName.Search_File: ManagedTool(
     #     name=ToolName.Search_File,
