@@ -20,6 +20,11 @@ COPY tailwind.config.js .
 COPY postcss.config.js .
 COPY .en[v] .env
 
+# Build the Next.js app
+ARG NODE_ENV=development
+RUN if [ "$NODE_ENV" = "production" ]; then npm run build; else npm run build:dev; fi
+
+
 # Next.js collects completely anonymous telemetry data about general usage. Learn more here: https://nextjs.org/telemetry
 # Uncomment the following line to disable telemetry at run time
 # ENV NEXT_TELEMETRY_DISABLED 1
@@ -28,8 +33,16 @@ COPY .en[v] .env
 
 # Start Next.js in development mode based on the preferred package manager
 CMD \
-  if [ -f yarn.lock ]; then yarn dev; \
-  elif [ -f package-lock.json ]; then npm run dev; \
-  elif [ -f pnpm-lock.yaml ]; then pnpm dev; \
-  else npm run dev; \
+  if [ "$NODE_ENV" = "production" ]; then \
+    if [ -f yarn.lock ]; then yarn start; \
+    elif [ -f package-lock.json ]; then npm start:prod; \
+    elif [ -f pnpm-lock.yaml ]; then pnpm start:prod; \
+    else npm start:prod; \
+    fi; \
+  else \
+    if [ -f yarn.lock ]; then yarn dev; \
+    elif [ -f package-lock.json ]; then npm run dev; \
+    elif [ -f pnpm-lock.yaml ]; then pnpm dev; \
+    else npm run dev; \
+    fi; \
   fi

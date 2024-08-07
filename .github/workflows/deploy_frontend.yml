@@ -51,9 +51,10 @@ jobs:
             --project=${{ vars.GCP_PROJECT_ID }} \
             --image=${{ steps.meta.outputs.tags }} \
             --platform=managed \
+            --port=4000 \
             --region=us-central1 \
             --allow-unauthenticated \
-            --update-env-vars=NEXT_PUBLIC_API_HOSTNAME=${{ secrets.NEXT_PUBLIC_API_HOSTNAME }} \
+            --update-env-vars=NEXT_PUBLIC_API_HOSTNAME=${{ secrets.NEXT_PUBLIC_API_HOSTNAME }},NODE_ENV=production \
             --memory=4Gi \
             --cpu=4 \
             --max-instances=1

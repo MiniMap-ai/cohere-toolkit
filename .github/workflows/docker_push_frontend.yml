@@ -74,8 +74,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.IMAGE_NAME }} -f ./src/interfaces/coral_web/Dockerfile ./src/interfaces/coral_web/
-
+            docker build -t ${{ env.IMAGE_NAME }} -f ./src/interfaces/coral_web/Dockerfile --build-arg NODE_ENV=production ./src/interfaces/coral_web/
       - name: Tag Docker image
         run: |
           docker tag ${{ env.IMAGE_NAME }} ${{ steps.meta.outputs.tags }}
