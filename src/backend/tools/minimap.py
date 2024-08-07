@@ -93,8 +93,9 @@ class MinimapAPIWrapper(BaseModel):
             # limit the number of results to top_k_results
             results = results[:self.top_k_results]
 
-            # strip out the `id` field from the results
-            # results = [{"text": result["title"], 'url': result['url']} for result in results]
+            # Rename id to doc_id
+            for result in results:
+                result['doc_id'] = result.pop('id')
 
             print(results)
             return results

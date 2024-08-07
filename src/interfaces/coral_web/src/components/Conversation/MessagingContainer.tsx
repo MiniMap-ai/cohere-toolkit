@@ -98,11 +98,23 @@ const Content: React.FC<Props> = (props) => {
     if (streamingMessage && streamingMessage.state === 'fulfilled') {
       const generationId = (streamingMessage as FulfilledMessage).generationId
       if (citationReferences[generationId]) {
-        const minimapCitations = Object.values(citationReferences[generationId]).flat().filter(citation =>
-          citation.tool_name === 'Minimap'
-        )
-        const minimapCitationsUnique = new Set(minimapCitations.map(c => c.url))
-        window.top && window.top.postMessage({ type: 'newCitations', urls: Array.from(minimapCitationsUnique) }, '*')
+
+        // Filter
+        const minimapCitations = Object.values(citationReferences[generationId])
+          .flat()
+          .filter((citation: any) => citation.tool_name === 'Minimap')
+
+        // Extract and deduplicate doc_ids
+        let minimapCitationsUnique = new Set(minimapCitations.map((c: any) => parseInt(c.fields.doc_id, 10)));
+
+        const payload = {
+          ids: Array.from(minimapCitationsUnique),
+          citationId: generationId,
+        }
+
+        // Send to parent window
+        window.top && window.top.postMessage({ type: 'newCitations', payload }, '*')
+        console.log('newCitations', minimapCitationsUnique, window.top)
       }
     }
   }, [streamingMessage])
