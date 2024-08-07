@@ -47,6 +47,7 @@ jobs:
             --platform=managed \
             --region=us-central1 \
             --allow-unauthenticated \
+            --update-env-vars=NEXT_PUBLIC_API_HOSTNAME=${{ secrets.NEXT_PUBLIC_API_HOSTNAME }} \
             --memory=4Gi \
             --cpu=4 \
             --max-instances=1
