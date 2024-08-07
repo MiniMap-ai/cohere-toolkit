@@ -36,9 +36,9 @@ RUN if [ "$NODE_ENV" = "production" ]; then npm run build; else npm run build:de
 CMD \
   if [ "$NODE_ENV" = "production" ]; then \
     if [ -f yarn.lock ]; then yarn start; \
-    elif [ -f package-lock.json ]; then npm start:prod; \
-    elif [ -f pnpm-lock.yaml ]; then pnpm start:prod; \
-    else npm start:prod; \
+    elif [ -f package-lock.json ]; then npm run start:prod; \
+    elif [ -f pnpm-lock.yaml ]; then pnpm run start:prod; \
+    else npm run start:prod; \
     fi; \
   else \
     if [ -f yarn.lock ]; then yarn dev; \
