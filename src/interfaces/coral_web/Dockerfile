@@ -19,6 +19,7 @@ COPY tsconfig.json .
 COPY tailwind.config.js .
 COPY postcss.config.js .
 COPY .en[v] .env
+COPY .env.production .
 
 # Build the Next.js app
 ARG NODE_ENV=development
