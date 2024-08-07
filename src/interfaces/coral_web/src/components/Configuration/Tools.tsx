@@ -24,12 +24,12 @@ export const Tools: React.FC<{ className?: string }> = ({ className = '' }) => {
       <ToolSection />
 
       {/* File upload is not supported for conversarions without an id */}
-      {conversationId && files.length > 0 && (
+      {/* {conversationId && files.length > 0 && (
         <>
           <hr className="my-6 border-t border-marble-400" />
           <FilesSection />
         </>
-      )}
+      )} */}
     </article>
   );
 };
@@ -71,6 +71,13 @@ const ToolSection = () => {
       : enabledTools.filter((enabledTool) => enabledTool.name !== name);
     updateEnabledTools(updatedTools);
   };
+
+  // useEffect to enable all tools by default
+  React.useEffect(() => {
+    if (tools.length > 0 && enabledTools.length === 0) {
+      updateEnabledTools(tools);
+    }
+  }, []);
 
   return (
     <section className="relative flex flex-col gap-y-5 px-5">
