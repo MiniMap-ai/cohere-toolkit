@@ -20,27 +20,27 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      # - name: Checkout repository
+      #   uses: actions/checkout@v4
 
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v1'
-        with:
-          credentials_json: '${{ secrets.GCP_SA_KEY }}'
+      # - id: 'auth'
+      #   uses: 'google-github-actions/auth@v1'
+      #   with:
+      #     credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
-      - name: Set up Cloud SDK
-        uses: google-github-actions/setup-gcloud@v1
-        with:
-          project_id: ${{ env.GCP_PROJECT_ID }}
+      # - name: Set up Cloud SDK
+      #   uses: google-github-actions/setup-gcloud@v1
+      #   with:
+      #     project_id: ${{ env.GCP_PROJECT_ID }}
 
-      - name: Authenticate Docker to Artifact Registry
-        run: gcloud auth configure-docker ${{ vars.REGISTRY }}
+      # - name: Authenticate Docker to Artifact Registry
+      #   run: gcloud auth configure-docker ${{ vars.REGISTRY }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v3
-        with:
-          images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
+      # - name: Extract metadata (tags, labels) for Docker
+      #   id: meta
+      #   uses: docker/metadata-action@v3
+      #   with:
+      #     images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       # - name: Build and push Docker image
       #   uses: docker/build-push-action@v2
@@ -48,6 +48,29 @@ jobs:
       #     context: ./src/interfaces/coral_web
       #     tags:  ${{ env.IMAGE_NAME }}
       #     push: true
+      - name: Login
+        uses: google-github-actions/setup-gcloud@v0
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          service_account_email: ${{ secrets.SA_EMAIL }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker --quiet
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - run: 'echo "$KEY" > ./key.json'
+        shell: bash
+        env:
+          KEY: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ vars.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       - name: Build Docker image
         run: |
