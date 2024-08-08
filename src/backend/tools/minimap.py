@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from typing import Any, Dict, List
 
 # from langchain.text_splitter import CharacterTextSplitter
@@ -35,6 +36,16 @@ More details: https://python.langchain.com/docs/integrations/retrievers
 
 logging = logging.getLogger(__name__)
 
+
+def hash_string(s: str) -> str:
+    """
+    Hash a string using the djb2 algorithm.
+    """
+    hash = 5381
+    for x in s:
+        hash = ((hash << 5) + hash) + ord(x)
+    return str(hash)
+
 class MinimapAPIWrapper(BaseModel):
     """
     Wrapper around Minimap.ai API.
@@ -64,7 +75,7 @@ class MinimapAPIWrapper(BaseModel):
     max_retry: int = 5
 
     # Default values for the parameters
-    top_k_results: int = 100
+    top_k_results: int = 50
     MAX_QUERY_LENGTH: int = 300
     doc_content_chars_max: int = 2000
 
@@ -90,15 +101,18 @@ class MinimapAPIWrapper(BaseModel):
 
             results = response_json.get("results", [])
 
+
+            df = pd.DataFrame(results)
+
+            df['title_hash'] = df['title'].apply(hash_string)
+
+            # drop duplicates
+            df = df.drop_duplicates(subset=['title_hash'])
+
+            results = df.to_dict(orient='records')
+
             # limit the number of results to top_k_results
             results = results[:self.top_k_results]
-
-            # Rename id to doc_id
-            for result in results:
-                try:
-                    result['doc_id'] = result.get('id')
-                except Exception as ex:
-                    ...
 
             return results
 

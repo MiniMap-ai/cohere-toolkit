@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from typing import Any, Dict, Generator, List
 
 import cohere
@@ -12,10 +13,56 @@ from backend.chat.enums import StreamEvent
 from backend.model_deployments.base import BaseDeployment
 from backend.model_deployments.utils import get_model_config_var
 from backend.schemas.cohere_chat import CohereChatRequest
+from backend.tools.minimap import LangChainMinimapRetriever
+
+from cohere.types.tool import Tool
+
+MINIMAP_TOOL = Tool(
+    name="Minimap",
+    description="Fetches the most relevant news and content from Minimap.ai.",
+    parameter_definitions={
+        "query": {
+            "description": "Search API that takes a query or phrase. Results should be presented as an executive summary, grouped and summarized for the user with section headings and bullet points.",
+            "type": "str",
+            "required": True,
+        }
+    },
+)
 
 COHERE_API_KEY_ENV_VAR = "COHERE_API_KEY"
 COHERE_ENV_VARS = [COHERE_API_KEY_ENV_VAR]
 
+
+MODELS =  [
+        {
+            'name': 'command-r',
+            'endpoints': ['generate', 'chat', 'summarize'],
+            'finetuned': False,
+            'context_length': 128000,
+            'tokenizer_url': 'https://storage.googleapis.com/cohere-public/tokenizers/command-r.json',
+            'default_endpoints': []
+        },
+        {
+            'name': 'command-r-plus',
+            'endpoints': ['generate', 'chat', 'summarize'],
+            'finetuned': False,
+            'context_length': 128000,
+            'tokenizer_url': 'https://storage.googleapis.com/cohere-public/tokenizers/command-r-plus.json',
+            'default_endpoints': ['chat']
+        },
+]
+
+preamble = f"""
+You are a news summarization assistant. You're equipped with Minimap.ai's news search tool.
+
+You will be provided with large number of news articles. You're task is to provide users with salient summaries of major trends in the news. Summaries should be presented as a mini news brief, with topic headings and contain bullet points with key information.
+
+You can elaborate on or use a more precise query than what the user provided to get more specific results.
+
+Always ask the user if there's a specific point or topic they want to drill down on.
+
+Today's date is {time.strftime("%Y-%m-%d")}.
+"""
 
 class CohereDeployment(BaseDeployment):
     """Cohere Platform Deployment."""
@@ -36,19 +83,20 @@ class CohereDeployment(BaseDeployment):
         if not CohereDeployment.is_available():
             return []
 
-        url = "https://api.cohere.ai/v1/models"
-        headers = {
-            "accept": "application/json",
-            "authorization": f"Bearer {cls.api_key}",
-        }
+        # url = "https://api.cohere.ai/v1/models"
+        # headers = {
+        #     "accept": "application/json",
+        #     "authorization": f"Bearer {cls.api_key}",
+        # }
 
-        response = requests.get(url, headers=headers)
+        # response = requests.get(url, headers=headers)
+        # logging.info(response.json())
+        # if not response.ok:
+        #     logging.warning("Couldn't get models from Cohere API.")
+        #     return []
 
-        if not response.ok:
-            logging.warning("Couldn't get models from Cohere API.")
-            return []
+        models = MODELS
 
-        models = response.json()["models"]
         return [
             model["name"]
             for model in models
@@ -60,6 +108,7 @@ class CohereDeployment(BaseDeployment):
         return all([os.environ.get(var) is not None for var in COHERE_ENV_VARS])
 
     def invoke_chat(self, chat_request: CohereChatRequest, **kwargs: Any) -> Any:
+        logging.info(f"Invoking chat with chat_request")
         response = self.client.chat(
             **chat_request.model_dump(exclude={"stream"}),
             **kwargs,
@@ -69,10 +118,22 @@ class CohereDeployment(BaseDeployment):
     def invoke_chat_stream(
         self, chat_request: CohereChatRequest, **kwargs: Any
     ) -> Generator[StreamedChatResponse, None, None]:
-        stream = self.client.chat_stream(
+
+        chat_params = {
             **chat_request.model_dump(exclude={"stream", "file_ids"}),
-            **kwargs,
+            **kwargs
+        }
+
+        # Append "Minimap" to the tools list
+        chat_params["tools"] = chat_params.get("tools", []) + [MINIMAP_TOOL]
+
+        # Set the preamble
+        chat_params["preamble"] = preamble
+
+        stream = self.client.chat_stream(
+            **chat_params,
         )
+
         for event in stream:
             yield to_dict(event)
 
@@ -106,4 +167,5 @@ class CohereDeployment(BaseDeployment):
         chat_request: CohereChatRequest,
         **kwargs: Any,
     ) -> Generator[StreamedChatResponse, None, None]:
+
         yield from self.invoke_chat_stream(chat_request, **kwargs)
