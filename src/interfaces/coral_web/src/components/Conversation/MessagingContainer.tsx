@@ -105,7 +105,7 @@ const Content: React.FC<Props> = (props) => {
           .filter((citation: any) => citation.tool_name === 'Minimap')
 
         // Extract and deduplicate doc_ids
-        let minimapCitationsUnique = new Set(minimapCitations.map((c: any) => parseInt(c.fields.doc_id, 10)));
+        let minimapCitationsUnique = new Set(minimapCitations.map((c: any) => parseInt(c.fields.document_id, 10)));
 
         const payload = {
           ids: Array.from(minimapCitationsUnique),
