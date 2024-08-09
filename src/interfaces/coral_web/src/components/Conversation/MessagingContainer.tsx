@@ -112,7 +112,7 @@ const Content: React.FC<Props> = (props) => {
         const payload = {
           ids: Array.from(minimapCitationsUnique),
           citationId: generationId,
-          search_key: parseInt((minimapCitations[0] as { fields: { search_key: string } }).fields.search_key),
+          search_key: parseInt((minimapCitations[0] as any ).fields.search_key),
         }
 
         // Send to parent window

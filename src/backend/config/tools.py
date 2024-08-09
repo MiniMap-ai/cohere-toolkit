@@ -187,3 +187,4 @@ def get_available_tools() -> dict[ToolName, dict]:
 
 
 AVAILABLE_TOOLS = get_available_tools()
+

@@ -59,7 +59,7 @@ class LangChainChat(BaseChat):
             verbose=True,
         )
 
-        raise NotImplementedError("Langchain is not yet implemented")
+
 
         return self.agent_executor.stream(
             {
