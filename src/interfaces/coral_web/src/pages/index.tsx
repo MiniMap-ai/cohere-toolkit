@@ -2,7 +2,7 @@ import { DehydratedState, QueryClient, dehydrate } from '@tanstack/react-query';
 import { GetServerSideProps, NextPage } from 'next';
 import { useContext, useEffect } from 'react';
 
-import { CohereClient } from '@/cohere-client';
+import { CohereClient, DEFAULT_CHAT_TOOL } from '@/cohere-client';
 import Conversation from '@/components/Conversation';
 import ConversationListPanel from '@/components/ConversationList/ConversationListPanel';
 import { Layout, LayoutSection } from '@/components/Layout';
@@ -40,6 +40,7 @@ const ChatPage: NextPage<Props> = () => {
     if (!deployment && allDeployments) {
       const firstAvailableDeployment = allDeployments.find((d) => d.is_available);
       if (firstAvailableDeployment) {
+        setParams({ tools: [{name: DEFAULT_CHAT_TOOL}] });
         setParams({ deployment: firstAvailableDeployment.name });
       }
     }

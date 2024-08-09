@@ -72,13 +72,6 @@ const ToolSection = () => {
     updateEnabledTools(updatedTools);
   };
 
-  // // useEffect to enable all tools by default
-  // React.useEffect(() => {
-  //   if (tools.length > 0 && enabledTools.length === 0) {
-  //     updateEnabledTools(tools);
-  //   }
-  // }, []);
-
   return (
     <section className="relative flex flex-col gap-y-5 px-5">
       <ToolsInfoBox />

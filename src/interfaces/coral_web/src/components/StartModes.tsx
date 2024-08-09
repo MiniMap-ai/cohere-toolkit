@@ -46,7 +46,7 @@ export const StartModes: React.FC<Props> = ({ show, className = '', onPromptSele
       className={cn('flex flex-col items-center gap-y-6', className)}
     >
       <Text styleAs="h5" className="text-center">
-        Ask about news
+        Ask about anything in the news
       </Text>
     </Transition>
   );

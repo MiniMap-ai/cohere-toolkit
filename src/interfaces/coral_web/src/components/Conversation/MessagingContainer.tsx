@@ -104,17 +104,20 @@ const Content: React.FC<Props> = (props) => {
           .flat()
           .filter((citation: any) => citation.tool_name === 'Minimap')
 
+        console.log('minimapCitations', minimapCitations)
+
         // Extract and deduplicate doc_ids
         let minimapCitationsUnique = new Set(minimapCitations.map((c: any) => parseInt(c.fields.document_id, 10)));
 
         const payload = {
           ids: Array.from(minimapCitationsUnique),
           citationId: generationId,
+          search_key: parseInt((minimapCitations[0] as { fields: { search_key: string } }).fields.search_key),
         }
 
         // Send to parent window
         window.top && window.top.postMessage({ type: 'newCitations', payload }, '*')
-        console.log('newCitations', minimapCitationsUnique, window.top)
+        console.log('newCitations', payload, window.top)
       }
     }
   }, [streamingMessage])
@@ -188,11 +191,11 @@ const Messages = forwardRef<HTMLDivElement, MessagesProps>(function MessagesInte
   const isConversationEmpty = messages.length === 0;
   return (
     <div className="flex h-full flex-col gap-y-4 px-4 py-6 md:gap-y-6" ref={ref}>
-      {/* {startOptionsEnabled && (
+      {startOptionsEnabled && (
         <div className="flex h-full w-full flex-col justify-center p-4">
           <StartModes show={isConversationEmpty} onPromptSelected={onPromptSelected} />
         </div>
-      )} */}
+      )}
 
       <div className="mt-auto flex flex-col gap-y-4 md:gap-y-6">
         {messages.map((m, i) => {

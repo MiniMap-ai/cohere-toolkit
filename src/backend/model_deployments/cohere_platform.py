@@ -64,6 +64,7 @@ Always ask the user if there's a specific point or topic they want to drill down
 Today's date is {time.strftime("%Y-%m-%d")}.
 """
 
+
 class CohereDeployment(BaseDeployment):
     """Cohere Platform Deployment."""
 

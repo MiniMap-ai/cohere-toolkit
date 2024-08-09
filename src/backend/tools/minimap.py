@@ -1,3 +1,4 @@
+import datetime
 import os
 import pandas as pd
 from typing import Any, Dict, List
@@ -70,12 +71,13 @@ class MinimapAPIWrapper(BaseModel):
     parse: Any  #: :meta private:
 
     base_url: str = os.environ.get("MINIMAP_API_URL", "http://host.docker.internal:8081")
-    search_endpoint: str = urljoin(base_url, "/api/v0/platform/elastic_search")
+    search_endpoint: str = urljoin(base_url, "/api/v1/platform/search")
+    search_content_endpoint: str = urljoin(base_url, "/api/v1/platform/search/results/content")
 
     max_retry: int = 5
 
     # Default values for the parameters
-    top_k_results: int = 50
+    top_k_results: int = 15
     MAX_QUERY_LENGTH: int = 300
     doc_content_chars_max: int = 2000
 
@@ -85,34 +87,62 @@ class MinimapAPIWrapper(BaseModel):
         Run search queries against the Minimap search PI
         Returns a list of documents, each with a title, summary, and id.
         """
+
         try:
             # Create teh url params
             query_params = {
                 'query': query,
+                'map_id': 5541696631538816
             }
 
             response = requests.get(self.search_endpoint, params=query_params)
 
-
             if response.status_code != 200:
                 return f"Minimap API returned status code {response.status_code}"
 
-            response_json = response.json()
+            search_status = response.json()
+            search_key = search_status['key']
 
-            results = response_json.get("results", [])
+            # Wait 0.25 seconds before checking the status
+            time.sleep(0.25)
+            tries = self.max_retry
+            search_results = None
+            while True:
+                response = requests.get(self.search_content_endpoint, params={'search_key': search_key})
+                if response.status_code == 404:
+                    if tries > 0:
+                        time.sleep(0.5)
+                        continue
+                    else:
+                        raise Exception(f"Error fetching results. The API returned status code {response.status_code}")
+
+                if response.status_code != 200:
+                    raise Exception(f"Error fetching results. The API returned status code {response.status_code}")
 
 
-            df = pd.DataFrame(results)
+                search_results = response.json()
+                break
+
+            df = pd.DataFrame(search_results['results'])
 
             df['title_hash'] = df['title'].apply(hash_string)
 
+            # Rename description to text
+            df.rename(columns={
+                'description': 'text',
+                'id': 'document_id'
+                }, inplace=True)
+
             # drop duplicates
             df = df.drop_duplicates(subset=['title_hash'])
+            df['search_key'] = search_key
 
             results = df.to_dict(orient='records')
 
             # limit the number of results to top_k_results
             results = results[:self.top_k_results]
+
+            logging.info(results)
 
             return results
 
@@ -158,8 +188,8 @@ class LangChainMinimapRetriever(CohereBaseTool):
         query = parameters.get("query", "")
         results = self.client.run(query)
 
-        # remap `id` to `document_id`
-        for result in results:
-            result["document_id"] = result.pop("id")
+        logging.info(results)
+        logging.info(f"Minimap results")
 
-        return [dict(result) for result in results]
+
+        return results # [dict(result) for result in results]
