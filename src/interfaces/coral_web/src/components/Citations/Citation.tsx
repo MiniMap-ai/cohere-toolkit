@@ -22,6 +22,33 @@ type Props = {
 
 const DEFAULT_NUM_VISIBLE_DOCS = 3;
 
+// Setup a debounce to ensure that the citation is broadcasted only once.
+let _debounceTimeout: any;
+function broadCastCitationSelection(citations: any[]) {
+  /**
+   * Takes a list of citations and broadcasts the selection to Minimap through window messaging.
+   *
+   * The React States are not stable so 0.25 debounce is added to ensure that the citation is broadcasted only once.
+   */
+
+  const broadcastCitation = (documentIds: number[]) => {
+    window.parent.postMessage({ type: 'selectedCitations', payload: { citations: documentIds } }, '*');
+  }
+
+
+  const documentIds = citations.map((c: any) => parseInt(c.fields.document_id, 10));
+
+  if (_debounceTimeout) {
+    clearTimeout(_debounceTimeout);
+  }
+
+  _debounceTimeout = setTimeout(() => {
+    console.log(citations, documentIds)
+    broadcastCitation(documentIds);
+  }, 500);
+
+}
+
 /**
  * Placeholder component for a citation.
  * This component is in charge of rendering the citations for a given generation.
@@ -92,6 +119,25 @@ export const Citation = React.forwardRef<HTMLDivElement, Props>(function Citatio
   const handleToggleAllDocsVisible = () => {
     setIsAllDocsVisible(!isAllDocsVisible);
   };
+
+  const selectedCitations = useMemo<any[]>(
+    () => {
+    return uniqueDocuments.filter((doc, index) => {
+      const isVisible =
+        (!isSelected && isAllDocsVisible) ||
+        (!isSelected && index < DEFAULT_NUM_VISIBLE_DOCS) ||
+        (isSelected && highlightedDocumentIds.includes(doc.document_id));
+
+      return isVisible;
+    });
+  }, [isSelected]);
+
+
+
+  useEffect(() => {
+    console.log('minimapCitations', selectedCitations)
+    broadCastCitationSelection(selectedCitations);
+  }, [selectedCitations])
 
   return (
     <Transition
